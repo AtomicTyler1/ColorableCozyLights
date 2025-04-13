@@ -4,11 +4,9 @@ using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine.SceneManagement;
 using UnityEngine;
-using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System;
 
 namespace Colorable_Cozy_Lights
 {
@@ -28,6 +26,7 @@ namespace Colorable_Cozy_Lights
         internal static RuntimeAnimatorController lightsAnimator;
 
         internal static new ManualLogSource Logger;
+
         private Harmony harmony;
 
         void Awake()
@@ -73,16 +72,16 @@ namespace Colorable_Cozy_Lights
         [HarmonyPatch(typeof(CozyLights), "Update")]
         public class CozyLightsPatch
         {
-            static bool lastAnimatorState = false;
+            static bool lastAnimatorState = false;    
 
             static void Postfix(CozyLights __instance)
             {
+                __instance.GetComponent<Animator>().runtimeAnimatorController = lightsAnimator;
+                var manager = FindObjectOfType<CozyLightsManager>();
                 if (__instance.cozyLightsAnimator.GetBool("on") && !lastAnimatorState)
                 {
-                    var manager = FindObjectOfType<CozyLightsManager>();
                     if (manager != null)
                     {
-                        __instance.GetComponent<Animator>().runtimeAnimatorController = lightsAnimator;
                         manager.Initialize();
                     }
                 }
@@ -105,6 +104,7 @@ namespace Colorable_Cozy_Lights
         private float animationTimer = 0f;
         private bool animationInitialized = false;
 
+        internal bool LightStatus = false;
         public bool MaterialMade = false;
 
         public Material cozyLightsNewMat;
@@ -199,7 +199,6 @@ namespace Colorable_Cozy_Lights
             }
         }
 
-        // I did this so the flashlight and anything elses colour doesnt change.
         public void MaterialHandler(MeshRenderer cozyLights)
         {
 
@@ -212,9 +211,7 @@ namespace Colorable_Cozy_Lights
             Material[] materials = cozyLights.materials;
 
             cozyLightsOldMat = materials[1];
-
-            cozyLightsNewMat.shader = cozyLightsOldMat.shader;
-            cozyLightsNewMat.name = "CozyLightsMaterial";
+            cozyLightsNewMat = new Material(Shader.Find("HDRP/Lit"));
 
             MaterialMade = true;
 
@@ -229,10 +226,10 @@ namespace Colorable_Cozy_Lights
             cozyLights.materials = materials;
         }
 
-        // It IS colour, i sacrifised my spelling for yall americans in the name.
         public void MaterialColourChanger(float R, float G, float B)
         {
             if (cozyLightsNewMat == null) { return; }
+            if (!LightStatus) { cozyLightsNewMat.color = new Color(0, 0, 0); return; }
             cozyLightsNewMat.color = new Color(R, G, B);
             cozyLightsNewMat.SetColor("_BaseColor", new Color(R, G, B));
         }
@@ -253,8 +250,7 @@ namespace Colorable_Cozy_Lights
             {
                 foreach (Transform child in shipCozyLights.transform)
                 {
-                    //MeshRenderer CozyLightMeshRenderer = child.GetComponent<MeshRenderer>();
-                    //MaterialHandler(CozyLightMeshRenderer);
+                    MeshRenderer CozyLightMeshRenderer = child.GetComponent<MeshRenderer>();
                     foreach (Transform megaChild in child)
                     {
                         if (megaChild.name == "Light")
@@ -262,15 +258,18 @@ namespace Colorable_Cozy_Lights
                             Light lightComponent = megaChild.GetComponent<Light>();
                             if (lightComponent != null)
                             {
-                                //MaterialColourChanger(normalizedR, normalizedG, normalizedB);
+                                if (!lightComponent.isActiveAndEnabled) { LightStatus = false; }
+                                else { LightStatus = true; }
+                                MaterialHandler(CozyLightMeshRenderer);
+                                MaterialColourChanger(normalizedR, normalizedG, normalizedB);
                                 lightComponent.intensity = brightness;
                                 lightComponent.color = new Color(normalizedR, normalizedG, normalizedB);
                             }
                         }
                         else
                         {
-                            //MeshRenderer CozyLightMeshRenderer2 = megaChild.GetComponent<MeshRenderer>();
-                            //MaterialHandler(CozyLightMeshRenderer2);
+                            MeshRenderer CozyLightMeshRenderer2 = megaChild.GetComponent<MeshRenderer>();
+                            MaterialHandler(CozyLightMeshRenderer2);
                         }
                     }
                 }
