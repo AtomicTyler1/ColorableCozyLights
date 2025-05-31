@@ -23,16 +23,54 @@ This includes 8 config options.
 - Enable Animations (If it should look to use animations)
 - Animations (The animations https://atomictyler.dev/tools/lights)
 
-# Animations go to: https://atomictyler.dev/tools/lights
+# Animations go to: https://atomictyler.dev/
+
+**THE WEBSITE DOES NOT SAVE ANIMATIONS ON REFRESH OR LEAVE!! PLEASE SAVE YOUR ANIMATION SOMEWHERE!!**
+
+*When entering the website, please scroll down until you stumble across the custom tools section. It is then the second tool. You should get the hang of it relitively quickly. Although if you want to import codes, please make sure they arnt too big otherwise the website may become frozen for you.*
+
+Here, try importing this code, it may look complicated but all I did was use the builder and it took 1 minute!
+
+```
+{'255,0,0,1.00','100'},{'0,17,255,1.00','100'},{'0,255,85,1.00','100'},{'0,76,148,1.00','100'},{'255,187,0,1.00','100'},{'153,0,255,1.00','100'},{'255,255,255,1.00','100'}
+```
+
+# Making manual animations
+
+The animation process consists of the following: 
+
+```
+{'0,0,0,0','100'}
+```
+
+That may look confusing, so lets do a deeper dive.
+
+| Red Value       | Green Value | Blue Value       | Alpha Value | Time (ms) Value |
+| --------------- | ----------- | ---------------- | ----------- | --------------- |
+|      0          | 0           |      0           | 0           |      100        | 
+
+Thats basically what it is, but thats just a solid color, why not cycle between red and blue every 1000ms?
+To do this, we do the same thing as before, but now to introduce a new step we take a comma and do the same **{},{}**
+
+```
+{'0,0,255,1','1000'},{'255,0,0,1','1000'}
+```
+
+And this is all very similar! You can go infinitely, but it may be better to use the website to see what each step looks like.
+
+| Red Value       | Green Value | Blue Value       | Alpha Value | Time (ms) Value |
+| --------------- | ----------- | ---------------- | ----------- | --------------- |
+|      0          | 0           |      255         | 1           |      1000       | 
+|      255        | 0           |      0           | 1           |      1000       | 
 
 After changing the colors in the config. You dont need a restart.
 "But its not going back". Turn the lights on and off 2 - 3 times.
 
 Helpful website for RGB values (This website is RGBA, no worries. Skip out the last number box):
-Box 1 = R
-Box 2 = G
-Box 3 = B
-Box 4 = Miss out, the mod auto does it
+- Box 1 = R
+- Box 2 = G
+- Box 3 = B
+- Box 4 = Miss out, the mod auto does it
 
 https://rgbacolorpicker.com
 
